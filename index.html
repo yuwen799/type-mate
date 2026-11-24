@@ -6,7 +6,7 @@
 <title>Type Mate</title>
 <meta name="description" content="Type Mate：导入自己的段落、句子、单词，练习英文盲打。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&family=Silkscreen&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Pixelify+Sans:wght@400;600&family=Silkscreen&display=swap" rel="stylesheet">
 <style>
 /* VOICE: playful but focused — a pocket practice machine, the line you type is the only bright thing
    IDEA: a grey-plastic handheld with an olive dot-matrix LCD; the keyboard below is its rubber keypad
@@ -44,20 +44,20 @@ select{min-width:240px}
 .stat.big b{font-size:clamp(46px,7vw,72px)}
 .stat span{font-size:15px;margin-left:6px}
 .ime{font-size:15px;margin-left:auto;background:var(--px);color:var(--lcd);padding:2px 8px;text-shadow:none}
-.box{position:relative;cursor:text}
-.view{overflow:hidden;height:calc(3 * 1.6em);font:clamp(20px,2.8vw,30px)/1.6 "Pixelify Sans","PingFang SC",sans-serif}
-#text{position:relative;transition:transform .15s steps(3);color:var(--px2)}
+.box{position:relative;cursor:text;text-shadow:none}
+.view{overflow:hidden;height:calc(3 * 1.7em);font:500 clamp(19px,2.5vw,27px)/1.7 "IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+#text{position:relative;transition:transform .15s steps(3);color:#5b6a33}
 .w{white-space:nowrap}
-.c.ok{color:var(--px)}
+.c.ok{color:var(--px);font-weight:600}
 .c.bad{background:var(--px);color:var(--lcd);text-shadow:none}
 .c.sp.bad{background:var(--px)}
 #caret{position:absolute;left:-2px;top:0;width:4px;background:var(--px);animation:blink 1s steps(1) infinite}
 .running #caret{animation:none}
 @keyframes blink{50%{opacity:0}}
-.blur .view{opacity:.35}
+.blur .view,.paused .view{opacity:.3}
 .cover{position:absolute;inset:0;display:none;place-items:center;font-size:18px}
 .cover span{background:var(--px);color:var(--lcd);padding:6px 14px;text-shadow:none}
-.blur .cover{display:grid}
+.blur .cover,.paused .cover{display:grid}
 .sr{position:absolute;opacity:0;width:1px;height:1px;left:0;top:0;border:0;padding:0;resize:none}
 #res{display:none}
 .done #res{display:block}.done .stats,.done .box{display:none}
@@ -129,6 +129,7 @@ footer{text-align:center;font:12px Silkscreen,monospace;color:var(--mute);paddin
     <button class="chip" id="tShuf" aria-pressed="true">乱序</button>
     <button class="chip" id="tKb" aria-pressed="true">键盘提示</button>
     <button class="chip" id="tBack" aria-pressed="true">允许退格</button>
+    <button class="chip" id="tCase" aria-pressed="true">区分大小写</button>
   </div>
 
   <div class="bezel">
@@ -143,7 +144,7 @@ footer{text-align:center;font:12px Silkscreen,monospace;color:var(--mute);paddin
       </div>
       <div class="box" id="box">
         <div class="view"><div id="text"></div></div>
-        <div class="cover"><span>点这里，或直接开始打字</span></div>
+        <div class="cover"><span id="coverT">点这里，或直接开始打字</span></div>
         <textarea id="ta" class="sr" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="打字输入"></textarea>
       </div>
       <div id="res">
@@ -163,8 +164,9 @@ footer{text-align:center;font:12px Silkscreen,monospace;color:var(--mute);paddin
 
   <div class="ctl">
     <button class="rb" id="again"><i></i>重来</button>
-    <button class="rb" id="next" style="margin-top:-18px"><i></i>换一组</button>
-    <span class="tip"><kbd>Esc</kbd> 重来 · <kbd>Ctrl</kbd>+<kbd>⌫</kbd> 删除整词 · 计时从第一个键开始</span>
+    <button class="rb" id="pause" style="margin-top:-18px"><i></i><span id="pauseL">暂停</span></button>
+    <button class="rb" id="next"><i></i>换一组</button>
+    <span class="tip"><kbd>Esc</kbd> 重来 · <kbd>Tab</kbd> 暂停/继续 · <kbd>Ctrl</kbd>+<kbd>⌫</kbd> 删除整词 · 计时从第一个键开始</span>
   </div>
   <div id="kbw"><div id="kb"></div>
     <div class="legend"><span><i class="f0"></i>小指</span><span><i class="f1"></i>无名指</span><span><i class="f2"></i>中指</span><span><i class="f3"></i>食指</span><span>F 和 J 上有凸点，手指放回这里</span></div>
@@ -221,7 +223,7 @@ const TYPEN={para:'段落',sent:'句子',word:'单词'};
 const HELP={para:'按原文顺序整段练习。',sent:'每行一句；如果只有一行，会按句号、问号、叹号自动拆分。可乱序。',word:'用空格、换行或逗号分隔。可乱序，计时模式会循环出词。'};
 const DURS=[[15,'15秒'],[30,'30秒'],[60,'1分'],[180,'3分'],[300,'5分'],[0,'全文']];
 let sets=LS.get('tp.sets',null);if(!Array.isArray(sets)||!sets.length)sets=SAMPLES.map(s=>({...s}));
-let cfg=Object.assign({set:'s1',dur:60,shuffle:true,kb:true,back:true},LS.get('tp.cfg',{}));
+let cfg=Object.assign({set:'s1',dur:60,shuffle:true,kb:true,back:true,caseS:true},LS.get('tp.cfg',{}));
 let hist=LS.get('tp.hist',[]);if(!Array.isArray(hist))hist=[];
 const save=()=>{LS.set('tp.sets',sets);LS.set('tp.cfg',cfg)};
 const cur=()=>sets.find(s=>s.id===cfg.set)||sets[0];
@@ -235,11 +237,13 @@ function build(){const s=cur();let tk=tokens(s);if(!tk.length)tk=['empty'];const
   do{out.push(...(cfg.shuffle&&s.type!=='para'?shuffle(tk.slice()):tk))}while(tgt&&out.join(' ').length<tgt);return out.join(' ')}
 
 const box=$('#box'),text=$('#text'),ta=$('#ta'),stage=$('#stage');
-let T='',chars=[],car,idx,typed,keys,goodKeys,goodChars,errs,missed,started,done,t0,tick;
+let T='',chars=[],car,idx,typed,keys,goodKeys,goodChars,errs,missed,started,done,t0,tick,paused=false,acc=0;
+const same=(a,b)=>a!==undefined&&(cfg.caseS?a===b:a.toLowerCase()===b.toLowerCase());
+const elapsed=()=>started?acc+(paused?0:(performance.now()-t0)/1000):0;
 function reset(){T=build();const ws=T.split(' ');
   text.innerHTML=ws.map((w,i)=>'<span class="w">'+[...w].map(c=>'<span class="c">'+esc(c)+'</span>').join('')+'</span>'+(i<ws.length-1?'<span class="c sp"> </span>':'')).join('')+'<i id="caret"></i>';
   chars=[...text.querySelectorAll('.c')];car=$('#caret');T=chars.map(c=>c.textContent).join('');
-  idx=0;typed=[];keys=0;goodKeys=0;goodChars=0;errs=0;missed={};started=false;done=false;clearInterval(tick);
+  idx=0;typed=[];keys=0;goodKeys=0;goodChars=0;errs=0;missed={};started=false;done=false;paused=false;acc=0;clearInterval(tick);box.classList.remove('paused');$('#pauseL').textContent='暂停';$('#coverT').textContent='点这里，或直接开始打字';
   stage.classList.remove('done');box.classList.remove('running');stats(0);moveCaret();hiKey()}
 function moveCaret(){const c=chars[idx]||chars[chars.length-1];if(!c)return;const end=!chars[idx];
   const x=c.offsetLeft+(end?c.offsetWidth:0),y=c.offsetTop;car.style.height=c.offsetHeight+'px';car.style.transform=`translate(${x}px,${y}px)`;
@@ -248,15 +252,18 @@ const fmt=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60
 function stats(el){const m=el/60;$('#sW').textContent=m>0.02?Math.round(goodChars/5/m):0;
   $('#sA').textContent=keys?Math.round(goodKeys/keys*100)+'%':'100%';$('#sE').textContent=errs;
   if(cfg.dur>0){$('#sT').textContent=fmt(cfg.dur-el);$('#sTl').textContent='剩余'}else{$('#sT').textContent=fmt(el);$('#sTl').textContent='用时'}}
-function start(){started=true;t0=performance.now();box.classList.add('running');tick=setInterval(()=>{const el=(performance.now()-t0)/1000;if(cfg.dur>0&&el>=cfg.dur)finish();else stats(el)},200)}
+const run=()=>{clearInterval(tick);tick=setInterval(()=>{const el=elapsed();if(cfg.dur>0&&el>=cfg.dur)finish();else stats(el)},200)};
+function start(){started=true;acc=0;t0=performance.now();box.classList.add('running');run()}
+function pause(){if(!started||done||paused)return;acc=elapsed();paused=true;clearInterval(tick);stats(acc);box.classList.add('paused');box.classList.remove('running');$('#pauseL').textContent='继续';$('#coverT').textContent='已暂停 · 按任意键或点继续'}
+function resume(){if(!paused)return;paused=false;t0=performance.now();box.classList.remove('paused');box.classList.add('running');$('#pauseL').textContent='暂停';run();ta.focus()}
 const mark=(i,cls)=>{chars[i].className=chars[i].className.replace(/ (ok|bad)/g,'')+(cls?' '+cls:'')};
-function type(ch){if(done||!chars.length)return;if(!started)start();const exp=T[idx];keys++;
-  if(ch===exp){goodKeys++;goodChars++;mark(idx,'ok')}else{errs++;missed[exp]=(missed[exp]||0)+1;mark(idx,'bad')}
+function type(ch){if(done||!chars.length)return;if(paused){resume();return}if(!started)start();const exp=T[idx];keys++;
+  if(same(ch,exp)){goodKeys++;goodChars++;mark(idx,'ok')}else{errs++;missed[exp]=(missed[exp]||0)+1;mark(idx,'bad')}
   typed[idx]=ch;idx++;if(idx>=T.length){finish();return}moveCaret();hiKey()}
-function back(word){if(done||!cfg.back||idx===0)return;
-  const one=()=>{idx--;if(typed[idx]===T[idx])goodChars--;typed[idx]=undefined;mark(idx,'')};
+function back(word){if(done||paused||!cfg.back||idx===0)return;
+  const one=()=>{idx--;if(same(typed[idx],T[idx]))goodChars--;typed[idx]=undefined;mark(idx,'')};
   if(word){while(idx>0&&T[idx-1]===' ')one();while(idx>0&&T[idx-1]!==' ')one()}else one();moveCaret();hiKey()}
-function finish(){if(done)return;done=true;clearInterval(tick);const el=started?Math.min((performance.now()-t0)/1000,cfg.dur||1e9):0;stats(el);
+function finish(){if(done)return;done=true;clearInterval(tick);const el=Math.min(elapsed(),cfg.dur||1e9);paused=false;box.classList.remove('paused');stats(el);
   const m=Math.max(el,1)/60,w=Math.round(goodChars/5/m),a=keys?Math.round(goodKeys/keys*100):0;
   $('#rW').textContent=w;$('#rA').textContent=a+'%';$('#rR').textContent=Math.round(keys/5/m);$('#rC').textContent=goodChars+' / '+keys;$('#rD').textContent=fmt(el);
   const top=Object.entries(missed).sort((x,y)=>y[1]-x[1]).slice(0,8);
@@ -279,6 +286,7 @@ document.addEventListener('keydown',e=>{if(fieldFocused())return;
   if(e.key==='Process'||e.isComposing){$('#ime').hidden=false;return}
   if(e.key==='Escape'){e.preventDefault();reset();ta.focus();return}
   if(done)return;
+  if(e.key==='Tab'&&started&&!e.shiftKey){e.preventDefault();paused?resume():pause();return}
   if(document.activeElement&&document.activeElement.tagName==='BUTTON'&&(e.key==='Enter'||e.key===' '))return;
   if(e.ctrlKey||e.metaKey||e.altKey){if(e.key==='Backspace'&&!e.metaKey){e.preventDefault();ta.focus();back(true)}return}
   if(e.key==='Backspace'){e.preventDefault();ta.focus();back(false);return}
@@ -286,17 +294,20 @@ document.addEventListener('keydown',e=>{if(fieldFocused())return;
 ta.addEventListener('input',()=>{const v=ta.value;ta.value='';for(const c of clean(v))type(c)});
 ta.addEventListener('focus',()=>box.classList.remove('blur'));
 ta.addEventListener('blur',()=>{if(!done)box.classList.add('blur')});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()});
+$('#pause').onclick=()=>{paused?resume():(started?pause():ta.focus())};
 box.addEventListener('click',()=>ta.focus());
 addEventListener('resize',()=>moveCaret());
 
 function drawBar(){$('#durs').innerHTML=DURS.map(([d,l])=>'<button class="chip" data-d="'+d+'" aria-pressed="'+(cfg.dur===d)+'">'+l+'</button>').join('');
-  $('#tShuf').setAttribute('aria-pressed',cfg.shuffle);$('#tKb').setAttribute('aria-pressed',cfg.kb);$('#tBack').setAttribute('aria-pressed',cfg.back);$('#kbw').hidden=!cfg.kb;
+  $('#tShuf').setAttribute('aria-pressed',cfg.shuffle);$('#tKb').setAttribute('aria-pressed',cfg.kb);$('#tBack').setAttribute('aria-pressed',cfg.back);$('#tCase').setAttribute('aria-pressed',cfg.caseS);$('#kbw').hidden=!cfg.kb;
   $('#set').innerHTML=sets.map(s=>'<option value="'+esc(s.id)+'"'+(s.id===cur().id?' selected':'')+'>'+esc(s.name)+' · '+TYPEN[s.type]+'</option>').join('')}
 const restart=()=>{save();drawBar();drawLib();reset();ta.focus()};
 $('#durs').addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b){cfg.dur=+b.dataset.d;restart()}});
 $('#tShuf').onclick=()=>{cfg.shuffle=!cfg.shuffle;restart()};
 $('#tKb').onclick=()=>{cfg.kb=!cfg.kb;save();drawBar();hiKey();ta.focus()};
 $('#tBack').onclick=()=>{cfg.back=!cfg.back;save();drawBar();ta.focus()};
+$('#tCase').onclick=()=>{cfg.caseS=!cfg.caseS;restart()};
 $('#set').onchange=e=>{cfg.set=e.target.value;restart()};
 $('#again').onclick=()=>{reset();ta.focus()};
 $('#next').onclick=()=>{if(sets.length>1){const i=sets.indexOf(cur());cfg.set=sets[(i+1)%sets.length].id}restart()};
