@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Type Mate</title>
+<meta name="description" content="Type Mate：导入自己的段落、句子、单词，练习英文盲打。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&family=Silkscreen&display=swap" rel="stylesheet">
+<style>
+/* VOICE: playful but focused — a pocket practice machine, the line you type is the only bright thing
+   IDEA: a grey-plastic handheld with an olive dot-matrix LCD; the keyboard below is its rubber keypad
+   PICTURE: the LCD (stats + three-line text strip) sitting in its dark bezel, full keypad under it
+   COLOUR and TYPE: plastic #d6d2c7, bezel #55585f, LCD #a3b26b with ink #1f2b12, magenta buttons; Pixelify Sans + Silkscreen
+   LAYOUT: one device body holds header, chips, screen, buttons, keypad; library and history as smaller plastic panels below */
+:root{color-scheme:light;--bg:#e6e2d8;--shell:#d6d2c7;--shell2:#c3bfb3;--bez:#55585f;--lcd:#a3b26b;--px:#1f2b12;--px2:#65743a;--ink:#2b2a26;--mute:#5f5e57;--navy:#34376a;--mag:#b8265a;--mag2:#7d1a3d;--line:#aaa69b;--field:#f2f0e9}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Pixelify Sans",system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow-x:clip}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--navy);outline-offset:2px}
+.shell{max-width:1120px;margin:24px auto;background:linear-gradient(180deg,var(--shell),var(--shell2));border-radius:22px 22px 72px 22px;padding:clamp(16px,3vw,34px);box-shadow:inset 0 2px 0 rgb(255 255 255/.55),inset 0 -5px 0 rgb(0 0 0/.08),0 26px 50px -32px rgb(0 0 0/.55)}
+.shell.sm{border-radius:22px}
+.brand{font-family:Silkscreen,monospace}
+.head{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between}
+h1{margin:0;font:400 clamp(26px,4vw,38px)/1.05 Silkscreen,monospace;color:var(--navy)}
+h1 small{display:block;font:14px "Pixelify Sans",sans-serif;color:var(--mute);margin-top:6px}
+h2{margin:0 0 14px;font:400 22px/1.2 Silkscreen,monospace;color:var(--navy)}
+.pwr{display:flex;align-items:center;gap:8px;font:12px Silkscreen,monospace;color:var(--mute)}
+.pwr i{width:10px;height:10px;border-radius:50%;background:#e03a3a;box-shadow:0 0 8px #e03a3a}
+.pick{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--mute)}
+select,input[type=text]{min-height:44px;border:2px solid var(--line);background:var(--field);border-radius:10px;padding:0 12px;font-size:16px;color:var(--ink)}
+select{min-width:240px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:18px 0}
+.chip{min-height:40px;padding:0 14px;border-radius:999px;border:0;background:#b7b3a8;color:var(--ink);font-size:15px;box-shadow:inset 0 -3px 0 rgb(0 0 0/.15)}
+.chip[aria-pressed=true]{background:var(--navy);color:#fff;box-shadow:inset 0 3px 0 rgb(0 0 0/.3)}
+.sep{width:2px;height:22px;background:var(--line);margin:0 4px}
+.bezel{background:var(--bez);border-radius:14px 14px 44px 14px;padding:clamp(12px,2.4vw,24px) clamp(12px,3vw,30px);box-shadow:inset 0 2px 0 rgb(255 255 255/.12)}
+.bezel .lab{font:11px Silkscreen,monospace;color:#b9bcc4;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.bezel .lab::before,.bezel .lab::after{content:"";height:2px;flex:1;background:repeating-linear-gradient(90deg,#8a2a52 0 30px,#34376a 30px 60px)}
+.lcd{position:relative;background-color:var(--lcd);background-image:linear-gradient(rgb(30 45 15/.06) 1px,transparent 1px),linear-gradient(90deg,rgb(30 45 15/.06) 1px,transparent 1px);background-size:4px 4px;border-radius:4px;padding:clamp(14px,2.4vw,24px) clamp(14px,3vw,28px);box-shadow:inset 0 3px 12px rgb(0 0 0/.35);color:var(--px);text-shadow:2px 2px 0 rgb(31 43 18/.16)}
+.stats{display:flex;flex-wrap:wrap;gap:6px 36px;align-items:baseline;border-bottom:3px solid var(--px);padding-bottom:10px;margin-bottom:12px}
+.stat b{font-weight:600;font-size:clamp(28px,4vw,40px);font-variant-numeric:tabular-nums;line-height:1}
+.stat.big b{font-size:clamp(46px,7vw,72px)}
+.stat span{font-size:15px;margin-left:6px}
+.ime{font-size:15px;margin-left:auto;background:var(--px);color:var(--lcd);padding:2px 8px;text-shadow:none}
+.box{position:relative;cursor:text}
+.view{overflow:hidden;height:calc(3 * 1.6em);font:clamp(20px,2.8vw,30px)/1.6 "Pixelify Sans","PingFang SC",sans-serif}
+#text{position:relative;transition:transform .15s steps(3);color:var(--px2)}
+.w{white-space:nowrap}
+.c.ok{color:var(--px)}
+.c.bad{background:var(--px);color:var(--lcd);text-shadow:none}
+.c.sp.bad{background:var(--px)}
+#caret{position:absolute;left:-2px;top:0;width:4px;background:var(--px);animation:blink 1s steps(1) infinite}
+.running #caret{animation:none}
+@keyframes blink{50%{opacity:0}}
+.blur .view{opacity:.35}
+.cover{position:absolute;inset:0;display:none;place-items:center;font-size:18px}
+.cover span{background:var(--px);color:var(--lcd);padding:6px 14px;text-shadow:none}
+.blur .cover{display:grid}
+.sr{position:absolute;opacity:0;width:1px;height:1px;left:0;top:0;border:0;padding:0;resize:none}
+#res{display:none}
+.done #res{display:block}.done .stats,.done .box{display:none}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px;margin:6px 0 14px}
+.rgrid b{display:block;font-size:clamp(28px,4vw,40px);font-weight:600;line-height:1.1}
+.rgrid .hero b{font-size:clamp(48px,7vw,72px)}
+.rgrid span{font-size:14px}
+.rh{font:400 18px Silkscreen,monospace;margin:0 0 8px}
+.miss{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.miss span{padding:2px 10px;border:2px solid var(--px)}
+.ctl{display:flex;flex-wrap:wrap;gap:14px 28px;align-items:center;margin:20px 0 6px}
+.rb{display:flex;flex-direction:column;align-items:center;gap:6px;font:12px Silkscreen,monospace;color:var(--navy);background:none;border:0;padding:0}
+.rb i{width:54px;height:54px;border-radius:50%;background:var(--mag);box-shadow:0 5px 0 var(--mag2),inset 0 3px 0 rgb(255 255 255/.25);transition:transform .06s}
+.rb:active i{transform:translateY(4px);box-shadow:0 1px 0 var(--mag2)}
+.tip{font-size:14px;color:var(--mute)}
+kbd{font:12px Silkscreen,monospace;background:#4a4c54;color:#eee;border-radius:5px;padding:1px 6px}
+#kb{margin:18px auto 0;display:flex;flex-direction:column;gap:7px;max-width:860px;background:#bdb9ad;padding:14px;border-radius:16px;box-shadow:inset 0 3px 8px rgb(0 0 0/.18)}
+.row{display:flex;gap:7px}
+.k{flex:1 1 0;height:46px;display:grid;place-items:center;border-radius:9px;font:500 15px "Pixelify Sans",monospace;background:var(--fc,#4a4c54);color:#f2efe7;position:relative;box-shadow:0 4px 0 rgb(0 0 0/.32),inset 0 2px 0 rgb(255 255 255/.14);transition:transform .06s}
+.k.home::after{content:"";position:absolute;bottom:7px;width:12px;height:3px;border-radius:2px;background:currentColor;opacity:.6}
+.k.mod{background:#4a4c54;font:11px Silkscreen,monospace;color:#cfcbc0}
+.k.gap{visibility:hidden}
+.k.on{background:var(--mag);color:#fff;transform:translateY(3px);box-shadow:0 1px 0 var(--mag2),0 0 18px rgb(184 38 90/.7)}
+.f0,.f7{--fc:#8a5a66}.f1,.f6{--fc:#957f3f}.f2,.f5{--fc:#5b774a}.f3,.f4{--fc:#4b6283}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center;margin-top:12px;font-size:14px;color:var(--mute)}
+.legend i{display:inline-block;width:13px;height:13px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:var(--fc)}
+.two{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px}
+.card{background:var(--field);border-radius:14px;padding:clamp(16px,2.5vw,24px);box-shadow:inset 0 2px 6px rgb(0 0 0/.12)}
+label.f{display:block;font-size:14px;color:var(--mute);margin:12px 0 4px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+textarea.in{width:100%;min-height:180px;border:2px solid var(--line);border-radius:10px;padding:12px;background:#fff;font:15px/1.6 ui-monospace,Menlo,Consolas,monospace;resize:vertical}
+input[type=text]{width:100%}
+.btn{min-height:44px;padding:0 18px;border-radius:10px;border:0;background:#b7b3a8;box-shadow:inset 0 -3px 0 rgb(0 0 0/.15)}
+.btn.pri{background:var(--mag);color:#fff;box-shadow:inset 0 -3px 0 var(--mag2)}
+.acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;align-items:center}
+.file{font-size:14px;color:var(--mute)}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:12px 0;border-bottom:2px dotted var(--line)}
+.list .nm{flex:1 1 160px;overflow-wrap:anywhere}
+.list .meta{font-size:13px;color:var(--mute);display:block}
+.list li.cur .nm{color:var(--mag)}
+.sm{min-height:36px;padding:0 12px;border-radius:8px;border:2px solid var(--line);background:transparent;font-size:14px}
+.sm.warn{color:var(--mag);border-color:var(--mag)}
+.hl{background:var(--lcd);border-radius:6px;padding:12px 16px;color:var(--px);box-shadow:inset 0 3px 10px rgb(0 0 0/.25)}
+.hrow{display:grid;grid-template-columns:6.5em minmax(0,1fr) 4.8em 3.6em;gap:12px;align-items:center;padding:6px 0;border-bottom:2px dotted rgb(31 43 18/.3);font-size:15px}
+.hb{height:12px;background:repeating-linear-gradient(90deg,var(--px) 0 10px,transparent 10px 13px)}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sum{display:flex;gap:28px;margin-bottom:10px;flex-wrap:wrap}
+.sum b{font-size:30px;font-weight:600}.sum span{display:block;font-size:13px}
+.trim{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+.empty{padding:8px 0}
+footer{text-align:center;font:12px Silkscreen,monospace;color:var(--mute);padding:8px 0 32px}
+@media(max-width:760px){.two{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.shell{margin:0 0 12px;border-radius:0 0 40px 0}.shell.sm{border-radius:0}#kb{padding:8px;gap:4px}.row{gap:3px}.k{height:34px;font-size:12px;border-radius:5px}.k.mod{font-size:8px}.sep{display:none}select{min-width:0;flex:1}.pick{width:100%}.hrow{grid-template-columns:5em minmax(0,1fr) 4.2em 3.2em;font-size:13px}}
+@media(prefers-reduced-motion:reduce){#text,#caret,.k,.rb i{transition:none}#caret{animation:none}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="head">
+    <h1>TYPE·MATE<small>英文盲打练习机 · 导入你自己的段落、句子、单词</small></h1>
+    <div class="pwr"><i></i>POWER</div>
+  </div>
+  <div class="bar">
+    <label class="pick">练习内容 <select id="set"></select></label>
+  </div>
+  <div class="bar" style="margin-top:0">
+    <span id="durs" class="seg"></span><span class="sep"></span>
+    <button class="chip" id="tShuf" aria-pressed="true">乱序</button>
+    <button class="chip" id="tKb" aria-pressed="true">键盘提示</button>
+    <button class="chip" id="tBack" aria-pressed="true">允许退格</button>
+  </div>
+
+  <div class="bezel">
+    <p class="lab">DOT MATRIX · KEY TRAINER</p>
+    <div class="lcd" id="stage">
+      <div class="stats">
+        <div class="stat big"><b id="sW">0</b><span>WPM</span></div>
+        <div class="stat"><b id="sA">100%</b><span>准确</span></div>
+        <div class="stat"><b id="sT">1:00</b><span id="sTl">剩余</span></div>
+        <div class="stat"><b id="sE">0</b><span>错误</span></div>
+        <span class="ime" id="ime" hidden>请切换到英文输入法</span>
+      </div>
+      <div class="box" id="box">
+        <div class="view"><div id="text"></div></div>
+        <div class="cover"><span>点这里，或直接开始打字</span></div>
+        <textarea id="ta" class="sr" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="打字输入"></textarea>
+      </div>
+      <div id="res">
+        <p class="rh">RESULT · 本轮结果</p>
+        <div class="rgrid">
+          <div class="hero"><b id="rW">0</b><span>WPM</span></div>
+          <div><b id="rA">0%</b><span>准确率</span></div>
+          <div><b id="rR">0</b><span>原始速度（含错字）</span></div>
+          <div><b id="rC">0</b><span>正确字符 / 总按键</span></div>
+          <div><b id="rD">0</b><span>用时</span></div>
+        </div>
+        <span style="font-size:14px">最常打错的键</span>
+        <div class="miss" id="rM"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ctl">
+    <button class="rb" id="again"><i></i>重来</button>
+    <button class="rb" id="next" style="margin-top:-18px"><i></i>换一组</button>
+    <span class="tip"><kbd>Esc</kbd> 重来 · <kbd>Ctrl</kbd>+<kbd>⌫</kbd> 删除整词 · 计时从第一个键开始</span>
+  </div>
+  <div id="kbw"><div id="kb"></div>
+    <div class="legend"><span><i class="f0"></i>小指</span><span><i class="f1"></i>无名指</span><span><i class="f2"></i>中指</span><span><i class="f3"></i>食指</span><span>F 和 J 上有凸点，手指放回这里</span></div>
+  </div>
+</main>
+
+<section class="shell sm"><div class="two">
+  <div class="card">
+    <h2 id="fTitle">导入练习内容</h2>
+    <label class="f" for="fName">名称</label>
+    <input type="text" id="fName" placeholder="比如：DET 写作范文 1">
+    <label class="f">类型</label>
+    <div class="seg" id="fType">
+      <button class="chip" data-t="para" aria-pressed="true">段落</button>
+      <button class="chip" data-t="sent" aria-pressed="false">句子</button>
+      <button class="chip" data-t="word" aria-pressed="false">单词</button>
+    </div>
+    <p class="tip" id="fHelp"></p>
+    <textarea class="in" id="fText" placeholder="把文字粘贴到这里"></textarea>
+    <div class="acts">
+      <button class="btn pri" id="fSave">保存并练习</button>
+      <button class="btn" id="fCancel" hidden>取消编辑</button>
+      <label class="file">或导入 .txt 文件 <input type="file" id="fFile" accept=".txt,text/plain"></label>
+    </div>
+    <p class="tip" id="fMsg"></p>
+  </div>
+  <div class="card">
+    <h2>练习库</h2>
+    <ul class="list" id="lib"></ul>
+    <p class="tip">默认三组是示例内容，可以编辑或删除。内容只保存在这个浏览器里。</p>
+  </div>
+</div></section>
+
+<section class="shell sm">
+  <h2>练习记录</h2>
+  <div class="hl">
+    <div class="sum" id="hSum"></div>
+    <div id="hist"></div>
+  </div>
+  <div class="acts"><button class="sm" id="hClear">清空记录</button></div>
+</section>
+<footer>TYPE·MATE</footer>
+
+<script>
+{
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const SAMPLES=[
+{id:'s1',type:'para',name:'示例段落：城市绿地',text:'Many people believe that cities should invest more in public parks and green spaces. In my opinion, this is a wise decision for several reasons. First, parks give residents a place to exercise and relax, which can improve both physical and mental health. Second, trees and plants help to reduce air pollution and keep neighborhoods cooler during hot summers. Finally, green spaces bring people together, because families, students and older adults can meet and spend time outdoors. Although building parks requires money and land, the long-term benefits for the community are clearly worth the cost.'},
+{id:'s2',type:'sent',name:'示例句子：看图写作',text:'In this picture, I can see a group of young people sitting around a wooden table.\nThey seem to be working on a project together.\nOn the left side of the image, a woman is pointing at a laptop screen.\nThe room is bright and the atmosphere looks relaxed and friendly.\nIn the background, there is a large window with a view of the city.\nIt is likely that they are students preparing for an important presentation.\nOverall, the photo shows the value of teamwork and communication.\nOne man is holding a cup of coffee and smiling at his classmates.'},
+{id:'s3',type:'word',name:'示例单词：学术高频词',text:'analyze approach assess assume authority available benefit concept consistent constitute context contract create data define derive distribute economy environment establish estimate evident factor finance formula function identify income indicate individual interpret involve issue legal major method occur percent period policy principle proceed process require research respond role section sector significant similar source specific structure theory vary achieve acquire affect aspect category community complex conclude consequence construct consumer credit culture design distinct element equation evaluate feature final focus impact injury institute invest journal maintain normal obtain participate perceive positive potential previous primary purchase range region regulate relevant resource restrict secure seek select site strategy survey text tradition transfer'}];
+const TYPEN={para:'段落',sent:'句子',word:'单词'};
+const HELP={para:'按原文顺序整段练习。',sent:'每行一句；如果只有一行，会按句号、问号、叹号自动拆分。可乱序。',word:'用空格、换行或逗号分隔。可乱序，计时模式会循环出词。'};
+const DURS=[[15,'15秒'],[30,'30秒'],[60,'1分'],[180,'3分'],[300,'5分'],[0,'全文']];
+let sets=LS.get('tp.sets',null);if(!Array.isArray(sets)||!sets.length)sets=SAMPLES.map(s=>({...s}));
+let cfg=Object.assign({set:'s1',dur:60,shuffle:true,kb:true,back:true},LS.get('tp.cfg',{}));
+let hist=LS.get('tp.hist',[]);if(!Array.isArray(hist))hist=[];
+const save=()=>{LS.set('tp.sets',sets);LS.set('tp.cfg',cfg)};
+const cur=()=>sets.find(s=>s.id===cfg.set)||sets[0];
+const clean=t=>String(t).replace(/[\u2018\u2019\u201B\u2032]/g,"'").replace(/[\u201C\u201D\u2033]/g,'"').replace(/[\u2013\u2014]/g,'-').replace(/\u2026/g,'...').replace(/\u00A0/g,' ');
+function tokens(s){const t=clean(s.text);
+  if(s.type==='word')return t.split(/[\s,;，；、]+/).filter(Boolean);
+  if(s.type==='sent'){let l=t.split(/\n+/).map(x=>x.trim()).filter(Boolean);if(l.length<2)l=t.match(/[^.!?]+[.!?]+["')\]]*|[^.!?]+$/g)||[];return l.map(x=>x.trim().replace(/\s+/g,' ')).filter(Boolean)}
+  const p=t.trim().replace(/\s+/g,' ');return p?[p]:[]}
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function build(){const s=cur();let tk=tokens(s);if(!tk.length)tk=['empty'];const out=[];const tgt=cfg.dur>0?Math.max(600,cfg.dur*14):0;
+  do{out.push(...(cfg.shuffle&&s.type!=='para'?shuffle(tk.slice()):tk))}while(tgt&&out.join(' ').length<tgt);return out.join(' ')}
+
+const box=$('#box'),text=$('#text'),ta=$('#ta'),stage=$('#stage');
+let T='',chars=[],car,idx,typed,keys,goodKeys,goodChars,errs,missed,started,done,t0,tick;
+function reset(){T=build();const ws=T.split(' ');
+  text.innerHTML=ws.map((w,i)=>'<span class="w">'+[...w].map(c=>'<span class="c">'+esc(c)+'</span>').join('')+'</span>'+(i<ws.length-1?'<span class="c sp"> </span>':'')).join('')+'<i id="caret"></i>';
+  chars=[...text.querySelectorAll('.c')];car=$('#caret');T=chars.map(c=>c.textContent).join('');
+  idx=0;typed=[];keys=0;goodKeys=0;goodChars=0;errs=0;missed={};started=false;done=false;clearInterval(tick);
+  stage.classList.remove('done');box.classList.remove('running');stats(0);moveCaret();hiKey()}
+function moveCaret(){const c=chars[idx]||chars[chars.length-1];if(!c)return;const end=!chars[idx];
+  const x=c.offsetLeft+(end?c.offsetWidth:0),y=c.offsetTop;car.style.height=c.offsetHeight+'px';car.style.transform=`translate(${x}px,${y}px)`;
+  const lh=parseFloat(getComputedStyle(text).lineHeight)||40;text.style.transform=`translateY(${-Math.max(0,Math.round(y/lh)*lh-lh)}px)`}
+const fmt=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+function stats(el){const m=el/60;$('#sW').textContent=m>0.02?Math.round(goodChars/5/m):0;
+  $('#sA').textContent=keys?Math.round(goodKeys/keys*100)+'%':'100%';$('#sE').textContent=errs;
+  if(cfg.dur>0){$('#sT').textContent=fmt(cfg.dur-el);$('#sTl').textContent='剩余'}else{$('#sT').textContent=fmt(el);$('#sTl').textContent='用时'}}
+function start(){started=true;t0=performance.now();box.classList.add('running');tick=setInterval(()=>{const el=(performance.now()-t0)/1000;if(cfg.dur>0&&el>=cfg.dur)finish();else stats(el)},200)}
+const mark=(i,cls)=>{chars[i].className=chars[i].className.replace(/ (ok|bad)/g,'')+(cls?' '+cls:'')};
+function type(ch){if(done||!chars.length)return;if(!started)start();const exp=T[idx];keys++;
+  if(ch===exp){goodKeys++;goodChars++;mark(idx,'ok')}else{errs++;missed[exp]=(missed[exp]||0)+1;mark(idx,'bad')}
+  typed[idx]=ch;idx++;if(idx>=T.length){finish();return}moveCaret();hiKey()}
+function back(word){if(done||!cfg.back||idx===0)return;
+  const one=()=>{idx--;if(typed[idx]===T[idx])goodChars--;typed[idx]=undefined;mark(idx,'')};
+  if(word){while(idx>0&&T[idx-1]===' ')one();while(idx>0&&T[idx-1]!==' ')one()}else one();moveCaret();hiKey()}
+function finish(){if(done)return;done=true;clearInterval(tick);const el=started?Math.min((performance.now()-t0)/1000,cfg.dur||1e9):0;stats(el);
+  const m=Math.max(el,1)/60,w=Math.round(goodChars/5/m),a=keys?Math.round(goodKeys/keys*100):0;
+  $('#rW').textContent=w;$('#rA').textContent=a+'%';$('#rR').textContent=Math.round(keys/5/m);$('#rC').textContent=goodChars+' / '+keys;$('#rD').textContent=fmt(el);
+  const top=Object.entries(missed).sort((x,y)=>y[1]-x[1]).slice(0,8);
+  $('#rM').innerHTML=top.length?top.map(([k,n])=>'<span>'+(k===' '?'空格':esc(k))+' ×'+n+'</span>').join(''):'<span>没有错误，漂亮</span>';
+  if(keys>=10){hist.unshift({d:Date.now(),n:cur().name,dur:cfg.dur,w,a});hist=hist.slice(0,50);LS.set('tp.hist',hist);drawHist()}
+  stage.classList.add('done');box.classList.remove('running');hiKey();$('#again').focus()}
+
+const FING={};[['`1qaz',0],['2wsx',1],['3edc',2],['4rfv5tgb',3],['6yhn7ujm',4],['8ik,',5],['9ol.',6],["0p;/-['=]\\",7]].forEach(([s,f])=>[...s].forEach(c=>FING[c]=f));
+const SH={'~':'`','!':'1','@':'2','#':'3','$':'4','%':'5','^':'6','&':'7','*':'8','(':'9',')':'0','_':'-','+':'=','{':'[','}':']','|':'\\',':':';','"':"'",'<':',','>':'.','?':'/'};
+const M=(m,w,k)=>({m,w,k:k||''}),C=s=>[...s].map(c=>({c}));
+const KB=[[...C('`1234567890-='),M('⌫',2)],[M('Tab',1.5),...C('qwertyuiop[]'),{c:'\\',w:1.5}],[M('Caps',1.8),...C("asdfghjkl;'"),M('Enter',2.2)],[M('Shift',2.4,'shiftL'),...C('zxcvbnm,./'),M('Shift',2.6,'shiftR')],[{g:4},M('空格',7,' '),{g:4}]];
+$('#kb').innerHTML=KB.map(r=>'<div class="row">'+r.map(x=>x.g?'<b class="k gap" style="flex-grow:'+x.g+'"></b>':x.m?'<b class="k mod" style="flex-grow:'+x.w+'" data-k="'+esc(x.k)+'">'+esc(x.m)+'</b>':'<b class="k f'+FING[x.c]+(x.c==='f'||x.c==='j'?' home':'')+'"'+(x.w?' style="flex-grow:'+x.w+'"':'')+' data-k="'+esc(x.c)+'">'+esc(x.c.toUpperCase())+'</b>').join('')+'</div>').join('');
+const kbKeys=[...document.querySelectorAll('#kb .k[data-k]')].filter(k=>k.dataset.k!=='');
+function hiKey(){kbKeys.forEach(k=>k.classList.remove('on'));if(!cfg.kb||done)return;const e=T[idx];if(e===undefined)return;
+  const b=SH[e]||(e>='A'&&e<='Z'?e.toLowerCase():e);const sh=b!==e?(FING[b]>=4?'shiftL':'shiftR'):'';
+  kbKeys.forEach(k=>{if(k.dataset.k===b||k.dataset.k===sh)k.classList.add('on')})}
+
+const fieldFocused=()=>{const a=document.activeElement;return a&&a!==ta&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)};
+document.addEventListener('keydown',e=>{if(fieldFocused())return;
+  if(e.key==='Process'||e.isComposing){$('#ime').hidden=false;return}
+  if(e.key==='Escape'){e.preventDefault();reset();ta.focus();return}
+  if(done)return;
+  if(document.activeElement&&document.activeElement.tagName==='BUTTON'&&(e.key==='Enter'||e.key===' '))return;
+  if(e.ctrlKey||e.metaKey||e.altKey){if(e.key==='Backspace'&&!e.metaKey){e.preventDefault();ta.focus();back(true)}return}
+  if(e.key==='Backspace'){e.preventDefault();ta.focus();back(false);return}
+  if(e.key.length===1){e.preventDefault();$('#ime').hidden=true;if(document.activeElement!==ta)ta.focus();type(e.key)}});
+ta.addEventListener('input',()=>{const v=ta.value;ta.value='';for(const c of clean(v))type(c)});
+ta.addEventListener('focus',()=>box.classList.remove('blur'));
+ta.addEventListener('blur',()=>{if(!done)box.classList.add('blur')});
+box.addEventListener('click',()=>ta.focus());
+addEventListener('resize',()=>moveCaret());
+
+function drawBar(){$('#durs').innerHTML=DURS.map(([d,l])=>'<button class="chip" data-d="'+d+'" aria-pressed="'+(cfg.dur===d)+'">'+l+'</button>').join('');
+  $('#tShuf').setAttribute('aria-pressed',cfg.shuffle);$('#tKb').setAttribute('aria-pressed',cfg.kb);$('#tBack').setAttribute('aria-pressed',cfg.back);$('#kbw').hidden=!cfg.kb;
+  $('#set').innerHTML=sets.map(s=>'<option value="'+esc(s.id)+'"'+(s.id===cur().id?' selected':'')+'>'+esc(s.name)+' · '+TYPEN[s.type]+'</option>').join('')}
+const restart=()=>{save();drawBar();drawLib();reset();ta.focus()};
+$('#durs').addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b){cfg.dur=+b.dataset.d;restart()}});
+$('#tShuf').onclick=()=>{cfg.shuffle=!cfg.shuffle;restart()};
+$('#tKb').onclick=()=>{cfg.kb=!cfg.kb;save();drawBar();hiKey();ta.focus()};
+$('#tBack').onclick=()=>{cfg.back=!cfg.back;save();drawBar();ta.focus()};
+$('#set').onchange=e=>{cfg.set=e.target.value;restart()};
+$('#again').onclick=()=>{reset();ta.focus()};
+$('#next').onclick=()=>{if(sets.length>1){const i=sets.indexOf(cur());cfg.set=sets[(i+1)%sets.length].id}restart()};
+
+let fType='para',editing=null;
+const setType=t=>{fType=t;document.querySelectorAll('#fType .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===t));$('#fHelp').textContent=HELP[t]};
+$('#fType').onclick=e=>{const b=e.target.closest('[data-t]');if(b)setType(b.dataset.t)};
+const count=s=>{const n=tokens(s).length;return s.type==='word'?n+' 个词':s.type==='sent'?n+' 句':(clean(s.text).trim().split(/\s+/).filter(Boolean).length)+' 词'};
+function drawLib(){$('#lib').innerHTML=sets.map(s=>'<li class="'+(s.id===cur().id?'cur':'')+'"><span class="nm">'+esc(s.name)+'<span class="meta">'+TYPEN[s.type]+' · '+count(s)+'</span></span><button class="sm" data-go="'+esc(s.id)+'">练习</button><button class="sm" data-ed="'+esc(s.id)+'">编辑</button><button class="sm" data-del="'+esc(s.id)+'">删除</button></li>').join('')}
+$('#lib').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.go){cfg.set=b.dataset.go;restart();scrollTo({top:0,behavior:'smooth'})}
+  else if(b.dataset.ed){const s=sets.find(x=>x.id===b.dataset.ed);editing=s.id;$('#fName').value=s.name;$('#fText').value=s.text;setType(s.type);$('#fTitle').textContent='编辑：'+s.name;$('#fSave').textContent='保存修改';$('#fCancel').hidden=false;$('#fName').focus()}
+  else if(b.dataset.del){if(!b.classList.contains('warn')){b.classList.add('warn');b.textContent='确认删除？';return}
+    sets=sets.filter(x=>x.id!==b.dataset.del);if(!sets.length)sets=SAMPLES.map(s=>({...s}));if(editing===b.dataset.del)clearForm();restart()}};
+function clearForm(){editing=null;$('#fName').value='';$('#fText').value='';$('#fTitle').textContent='导入练习内容';$('#fSave').textContent='保存并练习';$('#fCancel').hidden=true}
+$('#fCancel').onclick=()=>{clearForm();$('#fMsg').textContent=''};
+$('#fSave').onclick=()=>{const txt=$('#fText').value.trim();const msg=$('#fMsg');
+  if(!txt){msg.textContent='先粘贴一些文字。';return}
+  msg.textContent=/[\u4e00-\u9fff]/.test(txt)?'提示：内容里有中文字符，练习时需要用英文键盘打出来。':'';
+  const name=$('#fName').value.trim()||txt.slice(0,24)+(txt.length>24?'…':'');
+  if(editing){const s=sets.find(x=>x.id===editing);if(s)Object.assign(s,{name,text:txt,type:fType});cfg.set=editing}
+  else{const id='u'+Date.now().toString(36);sets.unshift({id,name,type:fType,text:txt});cfg.set=id}
+  clearForm();restart();scrollTo({top:0,behavior:'smooth'})};
+$('#fFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('#fText').value=String(r.result);if(!$('#fName').value)$('#fName').value=f.name.replace(/\.txt$/i,'')};r.readAsText(f);e.target.value=''};
+
+function drawHist(){if(!hist.length){$('#hSum').innerHTML='';$('#hist').innerHTML='<p class="empty">完成一轮练习后，这里会记下速度和准确率。</p>';return}
+  const r=hist.slice(0,12),max=Math.max(...r.map(h=>h.w),1),best=Math.max(...hist.map(h=>h.w)),avg=Math.round(r.reduce((a,h)=>a+h.w,0)/r.length);
+  $('#hSum').innerHTML='<div><b>'+best+'</b><span>最高 WPM</span></div><div><b>'+avg+'</b><span>最近 '+r.length+' 次平均</span></div><div><b>'+hist.length+'</b><span>已完成轮数</span></div>';
+  $('#hist').innerHTML=r.map(h=>{const d=new Date(h.d);const dl=h.dur?(DURS.find(x=>x[0]===h.dur)||[0,h.dur+'秒'])[1]:'全文';
+    return '<div class="hrow"><span>'+(d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+'</span><div><div class="hb" style="width:'+Math.max(4,h.w/max*100)+'%"></div><div class="trim">'+esc(h.n)+' · '+dl+'</div></div><span class="num">'+(+h.w)+' WPM</span><span class="num">'+(+h.a)+'%</span></div>'}).join('')}
+$('#hClear').onclick=e=>{const b=e.currentTarget;if(!b.classList.contains('warn')){b.classList.add('warn');b.textContent='确认清空？';return}hist=[];LS.set('tp.hist',hist);b.classList.remove('warn');b.textContent='清空记录';drawHist()};
+
+setType('para');drawBar();drawLib();drawHist();reset();
+if(document.fonts)document.fonts.ready.then(moveCaret);
+ta.focus({preventScroll:true});if(document.activeElement!==ta)box.classList.add('blur');
+}
+</script>
+</body>
+</html>
