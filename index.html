@@ -11,11 +11,12 @@
 /* VOICE: playful but focused — a pocket practice machine, the line you type is the only bright thing
    IDEA: a grey-plastic handheld with an olive dot-matrix LCD; the keyboard below is its rubber keypad
    PICTURE: the LCD (stats + three-line text strip) sitting in its dark bezel, full keypad under it
-   COLOUR and TYPE: plastic #d6d2c7, bezel #55585f, LCD #a3b26b with ink #1f2b12, magenta buttons; Pixelify Sans + Silkscreen
+   COLOUR and TYPE: plastic #d6d2c7, bezel #55585f, pale LCD #f4f5ec with ink #1f2b12, magenta buttons; Pixelify Sans + Silkscreen
    LAYOUT: one device body holds header, chips, screen, buttons, keypad; library and history as smaller plastic panels below */
-:root{color-scheme:light;--bg:#e6e2d8;--shell:#d6d2c7;--shell2:#c3bfb3;--bez:#55585f;--lcd:#a3b26b;--px:#1f2b12;--px2:#65743a;--ink:#2b2a26;--mute:#5f5e57;--navy:#34376a;--mag:#b8265a;--mag2:#7d1a3d;--line:#aaa69b;--field:#f2f0e9}
+:root{color-scheme:light;--bg:#e6e2d8;--shell:#d6d2c7;--shell2:#c3bfb3;--bez:#55585f;--lcd:#f4f5ec;--px:#1f2b12;--px2:#65743a;--ink:#2b2a26;--mute:#5f5e57;--navy:#34376a;--mag:#b8265a;--mag2:#7d1a3d;--line:#aaa69b;--field:#f2f0e9}
 *{box-sizing:border-box;min-width:0}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Pixelify Sans",system-ui,"PingFang SC","Microsoft YaHei",sans-serif;overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;overflow-x:clip}
+.stat b,.rgrid b,.sum b{font-family:"Pixelify Sans",system-ui,sans-serif}
 button,select,input,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:3px solid var(--navy);outline-offset:2px}
@@ -24,8 +25,8 @@ button{cursor:pointer}
 .brand{font-family:Silkscreen,monospace}
 .head{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between}
 h1{margin:0;font:400 clamp(26px,4vw,38px)/1.05 Silkscreen,monospace;color:var(--navy)}
-h1 small{display:block;font:14px "Pixelify Sans",sans-serif;color:var(--mute);margin-top:6px}
-h2{margin:0 0 14px;font:400 22px/1.2 Silkscreen,monospace;color:var(--navy)}
+h1 small{display:block;font-size:14px;font-family:system-ui,-apple-system,"PingFang SC",sans-serif;color:var(--mute);margin-top:6px}
+h2{margin:0 0 14px;font-size:22px;line-height:1.25;font-weight:600;color:var(--navy)}
 .pwr{display:flex;align-items:center;gap:8px;font:12px Silkscreen,monospace;color:var(--mute)}
 .pwr i{width:10px;height:10px;border-radius:50%;background:#e03a3a;box-shadow:0 0 8px #e03a3a}
 .pick{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--mute)}
@@ -38,15 +39,16 @@ select{min-width:240px}
 .bezel{background:var(--bez);border-radius:14px 14px 44px 14px;padding:clamp(12px,2.4vw,24px) clamp(12px,3vw,30px);box-shadow:inset 0 2px 0 rgb(255 255 255/.12)}
 .bezel .lab{font:11px Silkscreen,monospace;color:#b9bcc4;margin:0 0 8px;display:flex;align-items:center;gap:8px}
 .bezel .lab::before,.bezel .lab::after{content:"";height:2px;flex:1;background:repeating-linear-gradient(90deg,#8a2a52 0 30px,#34376a 30px 60px)}
-.lcd{position:relative;background-color:var(--lcd);background-image:linear-gradient(rgb(30 45 15/.06) 1px,transparent 1px),linear-gradient(90deg,rgb(30 45 15/.06) 1px,transparent 1px);background-size:4px 4px;border-radius:4px;padding:clamp(14px,2.4vw,24px) clamp(14px,3vw,28px);box-shadow:inset 0 3px 12px rgb(0 0 0/.35);color:var(--px);text-shadow:2px 2px 0 rgb(31 43 18/.16)}
+.lcd{position:relative;background-color:var(--lcd);background-image:linear-gradient(rgb(30 45 15/.035) 1px,transparent 1px),linear-gradient(90deg,rgb(30 45 15/.035) 1px,transparent 1px);background-size:4px 4px;border-radius:4px;padding:clamp(14px,2.4vw,24px) clamp(14px,3vw,28px);box-shadow:inset 0 3px 12px rgb(0 0 0/.35);color:var(--px);text-shadow:2px 2px 0 rgb(31 43 18/.16)}
 .stats{display:flex;flex-wrap:wrap;gap:6px 36px;align-items:baseline;border-bottom:3px solid var(--px);padding-bottom:10px;margin-bottom:12px}
 .stat b{font-weight:600;font-size:clamp(28px,4vw,40px);font-variant-numeric:tabular-nums;line-height:1}
 .stat.big b{font-size:clamp(46px,7vw,72px)}
 .stat span{font-size:15px;margin-left:6px}
 .ime{font-size:15px;margin-left:auto;background:var(--px);color:var(--lcd);padding:2px 8px;text-shadow:none}
 .box{position:relative;cursor:text;text-shadow:none}
-.view{overflow:hidden;height:calc(3 * 1.7em);font:500 clamp(19px,2.5vw,27px)/1.7 "IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
-#text{position:relative;transition:transform .15s steps(3);color:#5b6a33}
+.view{overflow:hidden;height:calc(4 * 1.7em);font:500 clamp(19px,2.5vw,27px)/1.7 "IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+#text{position:relative;transition:transform .15s steps(3);color:#7a8268}
+.c.nl{font-size:.75em;opacity:.45;padding-left:2px}.c.nl.ok{opacity:.7}.c.nl.bad{opacity:1}
 .w{white-space:nowrap}
 .c.ok{color:var(--px);font-weight:600}
 .c.bad{background:var(--px);color:var(--lcd);text-shadow:none}
@@ -76,7 +78,7 @@ select{min-width:240px}
 kbd{font:12px Silkscreen,monospace;background:#4a4c54;color:#eee;border-radius:5px;padding:1px 6px}
 #kb{margin:18px auto 0;display:flex;flex-direction:column;gap:7px;max-width:860px;background:#bdb9ad;padding:14px;border-radius:16px;box-shadow:inset 0 3px 8px rgb(0 0 0/.18)}
 .row{display:flex;gap:7px}
-.k{flex:1 1 0;height:46px;display:grid;place-items:center;border-radius:9px;font:500 15px "Pixelify Sans",monospace;background:var(--fc,#4a4c54);color:#f2efe7;position:relative;box-shadow:0 4px 0 rgb(0 0 0/.32),inset 0 2px 0 rgb(255 255 255/.14);transition:transform .06s}
+.k{flex:1 1 0;height:46px;display:grid;place-items:center;border-radius:9px;font:500 15px "IBM Plex Mono",ui-monospace,monospace;background:var(--fc,#4a4c54);color:#f2efe7;position:relative;box-shadow:0 4px 0 rgb(0 0 0/.32),inset 0 2px 0 rgb(255 255 255/.14);transition:transform .06s}
 .k.home::after{content:"";position:absolute;bottom:7px;width:12px;height:3px;border-radius:2px;background:currentColor;opacity:.6}
 .k.mod{background:#4a4c54;font:11px Silkscreen,monospace;color:#cfcbc0}
 .k.gap{visibility:hidden}
@@ -166,7 +168,7 @@ footer{text-align:center;font:12px Silkscreen,monospace;color:var(--mute);paddin
     <button class="rb" id="again"><i></i>重来</button>
     <button class="rb" id="pause" style="margin-top:-18px"><i></i><span id="pauseL">暂停</span></button>
     <button class="rb" id="next"><i></i>换一组</button>
-    <span class="tip"><kbd>Esc</kbd> 重来 · <kbd>Tab</kbd> 暂停/继续 · <kbd>Ctrl</kbd>+<kbd>⌫</kbd> 删除整词 · 计时从第一个键开始</span>
+    <span class="tip"><kbd>Esc</kbd> 重来 · <kbd>Tab</kbd> 暂停/继续 · <kbd>Enter</kbd> 或空格换行 · <kbd>Ctrl</kbd>+<kbd>⌫</kbd> 删除整词 · 计时从第一个键开始</span>
   </div>
   <div id="kbw"><div id="kb"></div>
     <div class="legend"><span><i class="f0"></i>小指</span><span><i class="f1"></i>无名指</span><span><i class="f2"></i>中指</span><span><i class="f3"></i>食指</span><span>F 和 J 上有凸点，手指放回这里</span></div>
@@ -232,17 +234,21 @@ function tokens(s){const t=clean(s.text);
   if(s.type==='word')return t.split(/[\s,;，；、]+/).filter(Boolean);
   if(s.type==='sent'){let l=t.split(/\n+/).map(x=>x.trim()).filter(Boolean);if(l.length<2)l=t.match(/[^.!?]+[.!?]+["')\]]*|[^.!?]+$/g)||[];return l.map(x=>x.trim().replace(/\s+/g,' ')).filter(Boolean)}
   const p=t.trim().replace(/\s+/g,' ');return p?[p]:[]}
+function segs(s){if(s.type!=='para')return tokens(s).map(x=>[x,1]);const r=[];
+  for(const l of clean(s.text).replace(/\r/g,'').split('\n')){const x=l.trim().replace(/[ \t]+/g,' ');if(x)r.push([x,1]);else if(r.length)r[r.length-1][1]++}return r}
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
-function build(){const s=cur();let tk=tokens(s);if(!tk.length)tk=['empty'];const out=[];const tgt=cfg.dur>0?Math.max(600,cfg.dur*14):0;
-  do{out.push(...(cfg.shuffle&&s.type!=='para'?shuffle(tk.slice()):tk))}while(tgt&&out.join(' ').length<tgt);return out.join(' ')}
+let BR={};
+function build(){const s=cur();let base=segs(s);if(!base.length)base=[['empty',1]];const out=[];let len=0;const tgt=cfg.dur>0?Math.max(600,cfg.dur*14):0;
+  do{const b=base.map(x=>x.slice());if(cfg.shuffle&&s.type!=='para')shuffle(b);if(s.type==='para')b[b.length-1][1]=Math.max(2,b[b.length-1][1]);out.push(...b);len=out.reduce((a,x)=>a+x[0].length+1,0)}while(tgt&&len<tgt);
+  let t='';BR={};out.forEach(([x,n],i)=>{t+=x;if(i<out.length-1){BR[t.length]=n;t+='\n'}});return t}
 
 const box=$('#box'),text=$('#text'),ta=$('#ta'),stage=$('#stage');
 let T='',chars=[],car,idx,typed,keys,goodKeys,goodChars,errs,missed,started,done,t0,tick,paused=false,acc=0;
-const same=(a,b)=>a!==undefined&&(cfg.caseS?a===b:a.toLowerCase()===b.toLowerCase());
+const same=(a,b)=>a!==undefined&&(b==='\n'?(a==='\n'||a===' '):cfg.caseS?a===b:a.toLowerCase()===b.toLowerCase());
 const elapsed=()=>started?acc+(paused?0:(performance.now()-t0)/1000):0;
-function reset(){T=build();const ws=T.split(' ');
-  text.innerHTML=ws.map((w,i)=>'<span class="w">'+[...w].map(c=>'<span class="c">'+esc(c)+'</span>').join('')+'</span>'+(i<ws.length-1?'<span class="c sp"> </span>':'')).join('')+'<i id="caret"></i>';
-  chars=[...text.querySelectorAll('.c')];car=$('#caret');T=chars.map(c=>c.textContent).join('');
+function reset(){T=build();let h='',open=false;
+  for(let i=0;i<T.length;i++){const c=T[i];if(c===' '||c==='\n'){if(open){h+='</span>';open=false}h+=c===' '?'<span class="c sp"> </span>':'<span class="c nl">↵</span>'+'<br>'.repeat(BR[i]||1)}else{if(!open){h+='<span class="w">';open=true}h+='<span class="c">'+esc(c)+'</span>'}}
+  if(open)h+='</span>';text.innerHTML=h+'<i id="caret"></i>';chars=[...text.querySelectorAll('.c')];car=$('#caret');
   idx=0;typed=[];keys=0;goodKeys=0;goodChars=0;errs=0;missed={};started=false;done=false;paused=false;acc=0;clearInterval(tick);box.classList.remove('paused');$('#pauseL').textContent='暂停';$('#coverT').textContent='点这里，或直接开始打字';
   stage.classList.remove('done');box.classList.remove('running');stats(0);moveCaret();hiKey()}
 function moveCaret(){const c=chars[idx]||chars[chars.length-1];if(!c)return;const end=!chars[idx];
@@ -262,19 +268,19 @@ function type(ch){if(done||!chars.length)return;if(paused){resume();return}if(!s
   typed[idx]=ch;idx++;if(idx>=T.length){finish();return}moveCaret();hiKey()}
 function back(word){if(done||paused||!cfg.back||idx===0)return;
   const one=()=>{idx--;if(same(typed[idx],T[idx]))goodChars--;typed[idx]=undefined;mark(idx,'')};
-  if(word){while(idx>0&&T[idx-1]===' ')one();while(idx>0&&T[idx-1]!==' ')one()}else one();moveCaret();hiKey()}
+  if(word){const sp=c=>c===' '||c==='\n';while(idx>0&&sp(T[idx-1]))one();while(idx>0&&!sp(T[idx-1]))one()}else one();moveCaret();hiKey()}
 function finish(){if(done)return;done=true;clearInterval(tick);const el=Math.min(elapsed(),cfg.dur||1e9);paused=false;box.classList.remove('paused');stats(el);
   const m=Math.max(el,1)/60,w=Math.round(goodChars/5/m),a=keys?Math.round(goodKeys/keys*100):0;
   $('#rW').textContent=w;$('#rA').textContent=a+'%';$('#rR').textContent=Math.round(keys/5/m);$('#rC').textContent=goodChars+' / '+keys;$('#rD').textContent=fmt(el);
   const top=Object.entries(missed).sort((x,y)=>y[1]-x[1]).slice(0,8);
-  $('#rM').innerHTML=top.length?top.map(([k,n])=>'<span>'+(k===' '?'空格':esc(k))+' ×'+n+'</span>').join(''):'<span>没有错误，漂亮</span>';
+  $('#rM').innerHTML=top.length?top.map(([k,n])=>'<span>'+(k===' '?'空格':k==='\n'?'回车':esc(k))+' ×'+n+'</span>').join(''):'<span>没有错误，漂亮</span>';
   if(keys>=10){hist.unshift({d:Date.now(),n:cur().name,dur:cfg.dur,w,a});hist=hist.slice(0,50);LS.set('tp.hist',hist);drawHist()}
   stage.classList.add('done');box.classList.remove('running');hiKey();$('#again').focus()}
 
 const FING={};[['`1qaz',0],['2wsx',1],['3edc',2],['4rfv5tgb',3],['6yhn7ujm',4],['8ik,',5],['9ol.',6],["0p;/-['=]\\",7]].forEach(([s,f])=>[...s].forEach(c=>FING[c]=f));
 const SH={'~':'`','!':'1','@':'2','#':'3','$':'4','%':'5','^':'6','&':'7','*':'8','(':'9',')':'0','_':'-','+':'=','{':'[','}':']','|':'\\',':':';','"':"'",'<':',','>':'.','?':'/'};
 const M=(m,w,k)=>({m,w,k:k||''}),C=s=>[...s].map(c=>({c}));
-const KB=[[...C('`1234567890-='),M('⌫',2)],[M('Tab',1.5),...C('qwertyuiop[]'),{c:'\\',w:1.5}],[M('Caps',1.8),...C("asdfghjkl;'"),M('Enter',2.2)],[M('Shift',2.4,'shiftL'),...C('zxcvbnm,./'),M('Shift',2.6,'shiftR')],[{g:4},M('空格',7,' '),{g:4}]];
+const KB=[[...C('`1234567890-='),M('⌫',2)],[M('Tab',1.5),...C('qwertyuiop[]'),{c:'\\',w:1.5}],[M('Caps',1.8),...C("asdfghjkl;'"),M('Enter',2.2,'\n')],[M('Shift',2.4,'shiftL'),...C('zxcvbnm,./'),M('Shift',2.6,'shiftR')],[{g:4},M('空格',7,' '),{g:4}]];
 $('#kb').innerHTML=KB.map(r=>'<div class="row">'+r.map(x=>x.g?'<b class="k gap" style="flex-grow:'+x.g+'"></b>':x.m?'<b class="k mod" style="flex-grow:'+x.w+'" data-k="'+esc(x.k)+'">'+esc(x.m)+'</b>':'<b class="k f'+FING[x.c]+(x.c==='f'||x.c==='j'?' home':'')+'"'+(x.w?' style="flex-grow:'+x.w+'"':'')+' data-k="'+esc(x.c)+'">'+esc(x.c.toUpperCase())+'</b>').join('')+'</div>').join('');
 const kbKeys=[...document.querySelectorAll('#kb .k[data-k]')].filter(k=>k.dataset.k!=='');
 function hiKey(){kbKeys.forEach(k=>k.classList.remove('on'));if(!cfg.kb||done)return;const e=T[idx];if(e===undefined)return;
@@ -290,6 +296,7 @@ document.addEventListener('keydown',e=>{if(fieldFocused())return;
   if(document.activeElement&&document.activeElement.tagName==='BUTTON'&&(e.key==='Enter'||e.key===' '))return;
   if(e.ctrlKey||e.metaKey||e.altKey){if(e.key==='Backspace'&&!e.metaKey){e.preventDefault();ta.focus();back(true)}return}
   if(e.key==='Backspace'){e.preventDefault();ta.focus();back(false);return}
+  if(e.key==='Enter'){e.preventDefault();$('#ime').hidden=true;if(document.activeElement!==ta)ta.focus();type('\n');return}
   if(e.key.length===1){e.preventDefault();$('#ime').hidden=true;if(document.activeElement!==ta)ta.focus();type(e.key)}});
 ta.addEventListener('input',()=>{const v=ta.value;ta.value='';for(const c of clean(v))type(c)});
 ta.addEventListener('focus',()=>box.classList.remove('blur'));
